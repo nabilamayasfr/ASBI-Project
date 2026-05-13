@@ -22,9 +22,9 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::get('/beranda', function () {
     return view('beranda');
 })->name('beranda');
-Route::get('/pembelajaran', function () {
-    return view('pembelajaran');
-})->name('pembelajaran');
+
+Route::get('/pembelajaran', [PembelajaranController::class, 'index'])
+    ->name('pembelajaran');
 
 Route::get('/latihan', function () {
     return view('latihan');

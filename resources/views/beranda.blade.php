@@ -10,11 +10,11 @@
 
   <!-- HERO -->
   <section class="grid md:grid-cols-2 gap-8 items-center px-6 md:px-12 py-10 animate-fade-in">
-    
+
     <!-- TEXT -->
     <div>
       <h1 class="text-3xl md:text-5xl font-extrabold text-[#492F48] leading-tight mb-4">
-        Selamat Datang 
+        Selamat Datang
         <span class="text-pink-600">
           {{ explode(' ', auth()->user()->name ?? 'Ara')[0] }}!
         </span><br>
@@ -27,7 +27,7 @@
       </p>
 
       <div class="flex flex-wrap gap-3">
-        <a href="{{ route('pembelajaran') }}"
+        <a href="{{ route('pembelajaran.index') }}"
            class="px-6 py-2 rounded-xl border-2 border-pink-600 text-pink-600 font-bold bg-white hover:bg-pink-100 transition">
            Mulai Belajar
         </a>
@@ -42,7 +42,7 @@
     <!-- IMAGE -->
  <div class="flex justify-center items-center relative min-h-[300px]">
 
-    <div class="absolute w-[280px] h-[280px] rounded-full 
+    <div class="absolute w-[280px] h-[280px] rounded-full
     bg-[radial-gradient(circle,_#F7DAED_0%,_transparent_70%)]">
     </div>
 
@@ -62,7 +62,7 @@
     <div class="grid md:grid-cols-3 gap-4">
 
       <!-- CARD -->
-      <a href="{{ route('pembelajaran.sibi') }}"
+      <a href="{{ route('pembelajaran.index') }}"
           class="flex justify-between items-center p-5 rounded-2xl text-white shadow-lg hover:scale-105 hover:shadow-xl transition bg-[linear-gradient(135deg,_#E4ACDB_50%,_#BA76AE_100%)]">
 
         <div>
@@ -80,7 +80,7 @@
              alt="SIBI">
       </a>
 
-      <a href="{{ route('pembelajaran.bisindo') }}"
+      <a href="{{ route('pembelajaran.index') }}"
          class="flex justify-between items-center p-5 rounded-2xl text-white shadow-lg hover:scale-105 hover:shadow-xl transition bg-gradient-to-br from-pink-300 to-pink-600">
 
         <div>
@@ -163,10 +163,10 @@
     </p>
 
     <div class="bg-white rounded-2xl p-6 shadow-md border border-pink-100 hover:shadow-xl transition">
-      
+
       <div class="grid md:grid-cols-2 gap-4 mb-6">
 
-        <div class="flex justify-between items-center gap-3 p-[22px_18px] rounded-2xl text-white 
+        <div class="flex justify-between items-center gap-3 p-[22px_18px] rounded-2xl text-white
 bg-[linear-gradient(135deg,_#E4ACDB_50%,_#BA76AE_100%)]
 shadow-[0_4px_16px_rgba(200,45,133,0.15)]
 border-[1.5px] border-[rgba(255,255,255,0.4)]
@@ -186,7 +186,7 @@ hover:shadow-[0_10px_28px_rgba(200,45,133,0.25)]">
 </div>
 
 
-<div class="flex justify-between items-center gap-3 p-[22px_18px] rounded-2xl text-white 
+<div class="flex justify-between items-center gap-3 p-[22px_18px] rounded-2xl text-white
 bg-[linear-gradient(135deg,_#F1A2D0_53%,_#FE6AC0_100%)]
 shadow-[0_4px_16px_rgba(200,45,133,0.15)]
 border-[1.5px] border-[rgba(255,255,255,0.4)]
