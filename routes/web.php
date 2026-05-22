@@ -8,6 +8,7 @@ use App\Http\Controllers\PembelajaranController;
 use App\Http\Controllers\HistoriController;
 use App\Http\Controllers\ProfilController;
 use App\Http\Controllers\AdminAuthController;
+use App\Http\Controllers\LatihanController;
 
 
 Route::get('/', function () {
@@ -30,10 +31,10 @@ Route::get('/latihan', function () {
     return view('latihan');
 })->name('latihan');
 
-Route::get('/histori', function () {
-    return view('histori');
-})->name('histori');
 
+Route::get('/histori', [HistoriController::class, 'index'])
+     ->name('histori')
+     ->middleware('auth'); // wajib login untuk lihat histori
 
 Route::get('/pembelajaran/{modul}/{huruf}/detail', [PembelajaranController::class, 'showDetail'])->name('pembelajaran.detail');
 
@@ -71,4 +72,8 @@ Route::get('/admin/login', function () {
 Route::post('/admin/login', [AdminAuthController::class, 'login'])->name('admin.login.post');
 
 Route::post('/admin/login', [AdminAuthController::class, 'login'])->name('admin.login.post');
-Route::get('/histori', [HistoriController::class, 'index'])->name('histori');
+
+Route::get('/latihan', [LatihanController::class, 'index'])->name('latihan');
+
+Route::get('/latihan/soal', [LatihanController::class, 'getSoal'])->name('latihan.soal');
+Route::post('/latihan/simpan-hasil', [LatihanController::class, 'simpanHasil'])->name('latihan.simpan');

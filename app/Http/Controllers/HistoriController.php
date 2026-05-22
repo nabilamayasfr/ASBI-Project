@@ -3,135 +3,145 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\QuizResult;
+use App\Models\QuizQuestion;
+use Illuminate\Support\Facades\Auth;
 
 class HistoriController extends Controller
 {
+    const PER_PAGE = 10;
+
     public function index()
     {
-        $riwayat = [
-            [
-                'id'          => 1,
-                'tipe'        => 'praktik',   // 'praktik' | 'kuis'
-                'judul'       => 'Praktik Huruf',
-                'subjudul'    => 'BISINDO - A',
-                'skor'        => 90,
-                'benar'       => null,
-                'salah'       => null,
-                'total_soal'  => null,
-                'tanggal'     => '15 Apr 2026, 10:30',
-                'durasi'      => '12 menit',
-                'kategori'    => 'BISINDO',
-                'level'       => 'Pemula',
-                // Detail khusus praktik huruf
-                'huruf'       => 'A',
-                'status_hasil' => 'Sangat Baik',   // Sangat Baik / Baik / Cukup / Perlu Latihan
-                'rangkuman'   => 'Kamu berhasil mengenali huruf A dengan sangat baik! Gerakan tanganmu sudah tepat dan konsisten. Terus pertahankan dan lanjutkan ke huruf berikutnya.',
-                // Gambar/video dari webcam — taruh di: public/assets/praktik/sesi-1.jpg
-                // Bisa berupa array gambar snapshot atau path video
-                'media'       => [
-                    ['tipe' => 'gambar', 'path' => 'assets/praktik/sesi-1-a.jpg', 'label' => 'Snapshot 1'],
-                    ['tipe' => 'gambar', 'path' => 'assets/praktik/sesi-1-b.jpg', 'label' => 'Snapshot 2'],
-                    // ['tipe' => 'video', 'path' => 'assets/praktik/sesi-1.mp4', 'label' => 'Rekaman Sesi'],
-                ],
-            ],
-            [
-                'id'          => 2,
-                'tipe'        => 'kuis',
-                'judul'       => 'Kuis Kata',
-                'subjudul'    => 'Pemula',
-                'skor'        => 75,
-                'benar'       => 3,
-                'salah'       => 1,
-                'total_soal'  => 4,
-                'tanggal'     => '14 Apr 2026, 14:15',
-                'durasi'      => '8 menit',
-                'kategori'    => 'BISINDO',
-                'level'       => 'Pemula',
-                'huruf'       => null,
-                'status_hasil' => null,
-                'rangkuman'   => null,
-                'media'       => [],
-                // Detail soal yang sudah dikerjakan
-                'soal_detail' => [
-                    [
-                        'nomor'   => 1,
-                        'soal'    => 'Huruf apa yang ditunjukkan gerakan ini?',
-                        // Gambar soal — taruh di: public/assets/soal/huruf-v.png
-                        'img'     => 'assets/soal/huruf-v.png',
-                        'pilihan' => ['A', 'B', 'V', 'C'],
-                        'jawaban_user'   => 'V',
-                        'jawaban_benar'  => 'V',
-                        'benar'   => true,
-                    ],
-                    [
-                        'nomor'   => 2,
-                        'soal'    => 'Huruf apa yang ditunjukkan gerakan ini?',
-                        'img'     => 'assets/soal/huruf-b.png',
-                        'pilihan' => ['A', 'B', 'D', 'E'],
-                        'jawaban_user'   => 'A',
-                        'jawaban_benar'  => 'B',
-                        'benar'   => false,
-                    ],
-                    [
-                        'nomor'   => 3,
-                        'soal'    => 'Huruf apa yang ditunjukkan gerakan ini?',
-                        'img'     => 'assets/soal/huruf-c.png',
-                        'pilihan' => ['C', 'D', 'G', 'H'],
-                        'jawaban_user'   => 'C',
-                        'jawaban_benar'  => 'C',
-                        'benar'   => true,
-                    ],
-                    [
-                        'nomor'   => 4,
-                        'soal'    => 'Huruf apa yang ditunjukkan gerakan ini?',
-                        'img'     => 'assets/soal/huruf-d.png',
-                        'pilihan' => ['B', 'C', 'D', 'E'],
-                        'jawaban_user'   => 'D',
-                        'jawaban_benar'  => 'D',
-                        'benar'   => true,
-                    ],
-                ],
-            ],
-            [
-                'id'          => 3,
-                'tipe'        => 'praktik',
-                'judul'       => 'Praktik Huruf',
-                'subjudul'    => 'BISINDO - B',
-                'skor'        => 70,
-                'benar'       => null,
-                'salah'       => null,
-                'total_soal'  => null,
-                'tanggal'     => '13 Apr 2026, 09:00',
-                'durasi'      => '15 menit',
-                'kategori'    => 'BISINDO',
-                'level'       => 'Pemula',
-                'huruf'       => 'B',
-                'status_hasil' => 'Baik',
-                'rangkuman'   => 'Gerakan huruf B sudah cukup baik, namun posisi jari perlu sedikit diperbaiki. Coba perhatikan lagi video panduan dan ulangi latihan.',
-                'media'       => [
-                    ['tipe' => 'gambar', 'path' => 'assets/praktik/sesi-3-a.jpg', 'label' => 'Snapshot 1'],
-                ],
-            ],
-            [
-                'id'          => 4,
-                'tipe'        => 'praktik',
-                'judul'       => 'Praktik Huruf',
-                'subjudul'    => 'SIBI - A',
-                'skor'        => 60,
-                'benar'       => null,
-                'salah'       => null,
-                'total_soal'  => null,
-                'tanggal'     => '12 Apr 2026, 11:45',
-                'durasi'      => '10 menit',
-                'kategori'    => 'SIBI',
-                'level'       => 'Pemula',
-                'huruf'       => 'A',
-                'status_hasil' => 'Cukup',
-                'rangkuman'   => 'Latihan huruf A SIBI masih perlu ditingkatkan. Pastikan sudut tangan dan orientasi jari sesuai panduan. Jangan menyerah, terus berlatih!',
-                'media'       => [],
-            ],
+        // ← $userId WAJIB di baris pertama
+        $userId = Auth::id();
+
+        // Ambil dengan pagination
+        $hasilKuis = QuizResult::where('user_id', $userId)
+                               ->latest()
+                               ->paginate(self::PER_PAGE);
+
+        // ── FIX N+1: Kumpulkan semua question_id dari semua hasil sekaligus ──
+        // Daripada query ke quiz_questions satu per satu per soal,
+        // kita ambil semua yang dibutuhkan dalam SATU query
+        $semuaQuestionIds = $hasilKuis->getCollection()
+            ->flatMap(function ($result) {
+                if (!$result->answers_detail) return [];
+                return collect($result->answers_detail)
+                    ->pluck('question_id')
+                    ->filter();
+            })
+            ->unique()
+            ->values()
+            ->toArray();
+
+        // Satu query untuk semua soal yang dibutuhkan, simpan ke array indexed by id
+        $soalCache = QuizQuestion::whereIn('id', $semuaQuestionIds)
+                                 ->get()
+                                 ->keyBy('id');  // ['1' => QuizQuestion, '2' => QuizQuestion, ...]
+
+        // Map ke format Blade, dengan soalCache dikirim masuk
+        $riwayat = $hasilKuis->getCollection()->map(function ($result) use ($soalCache) {
+            return $this->formatHasilKuis($result, $soalCache);
+        });
+
+        // Statistik dari semua data user (bukan hanya halaman ini)
+        $allResults = QuizResult::where('user_id', $userId)->get();
+        $stats = [
+            'total_kuis'   => $allResults->count(),
+            'rata_skor'    => $allResults->count() > 0
+                              ? round($allResults->avg('score_percentage'))
+                              : 0,
+            'skor_terbaik' => $allResults->count() > 0
+                              ? $allResults->max('score_percentage')
+                              : 0,
         ];
 
-        return view('histori', compact('riwayat'));
+        // Data grafik 30 hari terakhir
+        $grafikData = QuizResult::where('user_id', $userId)
+            ->where('created_at', '>=', now()->subDays(30))
+            ->latest()
+            ->get()
+            ->map(fn($r) => [
+                'tanggal' => $r->created_at->format('d/m'),
+                'skor'    => $r->score_percentage,
+                'level'   => ucfirst($r->level),
+                'bahasa'  => strtoupper($r->language),
+            ])
+            ->reverse()
+            ->values();
+
+        // Kalau AJAX (load more)
+        if (request()->ajax()) {
+            return response()->json([
+                'html'      => view('partials.riwayat-items', compact('riwayat'))->render(),
+                'next_page' => $hasilKuis->nextPageUrl(),
+            ]);
+        }
+
+        return view('histori', [
+            'riwayat'   => $riwayat,
+            'stats'     => $stats,
+            'next_page' => $hasilKuis->nextPageUrl(),
+            'grafik'    => $grafikData,
+        ]);
+    }
+
+    // ── Terima $soalCache sebagai parameter, bukan query lagi ──
+    private function formatHasilKuis(QuizResult $result, $soalCache = null): array
+    {
+        $bahasa     = strtoupper($result->language);
+        $levelLabel = ucfirst($result->level);
+        $tanggal    = $result->created_at->locale('id')->isoFormat('D MMMM YYYY, HH:mm');
+        $benar      = $result->correct_answers;
+        $salah      = $result->total_questions - $benar;
+
+        $soalDetail = [];
+        if ($result->answers_detail) {
+            foreach ($result->answers_detail as $idx => $ans) {
+                $soalDetail[] = [
+                    'nomor'         => $idx + 1,
+                    'soal'          => 'Huruf apa yang ditunjukkan gerakan ini?',
+                    'img'           => ltrim(parse_url($ans['image_url'] ?? '', PHP_URL_PATH), '/'),
+                    'jawaban_benar' => $ans['correct_answer'] ?? '',
+                    'jawaban_user'  => $ans['user_answer']    ?? '',
+                    'benar'         => $ans['is_correct']     ?? false,
+                    'pilihan'       => $this->getPilihanFromCache($ans, $soalCache),
+                ];
+            }
+        }
+
+        return [
+            'tipe'        => 'kuis',
+            'judul'       => 'Kuis ' . $bahasa,
+            'subjudul'    => 'Level ' . $levelLabel . ' · ' . $result->created_at->locale('id')->isoFormat('D MMM YYYY'),
+            'skor'        => $result->score_percentage,
+            'benar'       => $benar,
+            'salah'       => $salah,
+            'total_soal'  => $result->total_questions,
+            'tanggal'     => $tanggal,
+            'durasi'      => isset($result->duration_seconds) && $result->duration_seconds
+                             ? gmdate('i:s', $result->duration_seconds) . ' menit'
+                             : '—',
+            'kategori'    => $bahasa,
+            'level'       => $levelLabel,
+            'soal_detail' => $soalDetail,
+        ];
+    }
+
+    // ── Ambil pilihan dari cache, bukan query ──
+    private function getPilihanFromCache(array $ans, $soalCache = null): array
+    {
+        if ($soalCache && !empty($ans['question_id'])) {
+            $soal = $soalCache->get($ans['question_id']);
+            if ($soal) return $soal->options;
+        }
+
+        // Fallback kalau soal sudah dihapus atau cache kosong
+        $pilihan = [$ans['correct_answer'] ?? ''];
+        if (isset($ans['user_answer']) && $ans['user_answer'] !== $ans['correct_answer']) {
+            $pilihan[] = $ans['user_answer'];
+        }
+        return array_unique($pilihan);
     }
 }

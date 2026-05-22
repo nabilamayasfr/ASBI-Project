@@ -84,7 +84,27 @@
   .pilihan-item.wrong .pilihan-text { color: #8B2020 !important; }
 
   .pilihan-item.locked  { cursor: default !important; }
-
+  /* Selected state untuk bahasa items */
+  .bahasa-item.selected {
+    border-color: #C82D85 !important;
+    background: #FEF0F8  !important;
+    box-shadow: 0 8px 28px rgba(200,45,133,0.22) !important;
+  }
+  .bahasa-item.selected .bahasa-radio-dot {
+    border-color: #C82D85 !important;
+    background: #C82D85  !important;
+  }
+  .bahasa-radio-dot::after {
+    content: '';
+    display: block;
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    background: #fff;
+    opacity: 0;
+    transition: opacity 0.2s;
+    margin: auto;
+  }
+  .bahasa-item.selected .bahasa-radio-dot::after { opacity: 1; }
   /* Selected state for level items */
   .level-item.selected {
     border-color: #C82D85 !important;
@@ -145,6 +165,46 @@
         </p>
       </div>
 
+      {{-- ── Pilih Bahasa ── --}}
+      <p class="text-[1.2rem] font-extrabold text-[#492F48] mb-4">Pilih Bahasa</p>
+
+      <div class="flex gap-3 mb-7">
+
+        {{-- BISINDO --}}
+        <label class="bahasa-item flex-1 flex items-center justify-between bg-white
+                      border-2 border-[#F2B8D8] rounded-[18px] px-[22px] py-4
+                      cursor-pointer transition-all duration-200
+                      shadow-[0_3px_14px_rgba(200,45,133,0.07)]
+                      hover:border-[#C82D85] hover:shadow-[0_8px_24px_rgba(200,45,133,0.18)]
+                      hover:-translate-y-0.5"
+              id="lbl-bisindo" onclick="selectBahasa('bisindo', this)">
+          <div>
+            <h3 class="text-[1.05rem] font-bold text-[#492F48] mb-0.5">BISINDO</h3>
+            <span class="text-[0.78rem] text-[#9B6898] font-medium">Bahasa Isyarat Indonesia</span>
+          </div>
+          <div class="bahasa-radio-dot w-[22px] h-[22px] rounded-full border-2 border-[#D8A8CE]
+                      bg-white flex items-center justify-center transition-all duration-200
+                      flex-shrink-0"></div>
+        </label>
+
+        {{-- SIBI --}}
+        <label class="bahasa-item flex-1 flex items-center justify-between bg-white
+                      border-2 border-[#F2B8D8] rounded-[18px] px-[22px] py-4
+                      cursor-pointer transition-all duration-200
+                      shadow-[0_3px_14px_rgba(200,45,133,0.07)]
+                      hover:border-[#C82D85] hover:shadow-[0_8px_24px_rgba(200,45,133,0.18)]
+                      hover:-translate-y-0.5"
+              id="lbl-sibi" onclick="selectBahasa('sibi', this)">
+          <div>
+            <h3 class="text-[1.05rem] font-bold text-[#492F48] mb-0.5">SIBI</h3>
+            <span class="text-[0.78rem] text-[#9B6898] font-medium">Sistem Isyarat Bahasa Indonesia</span>
+          </div>
+          <div class="bahasa-radio-dot w-[22px] h-[22px] rounded-full border-2 border-[#D8A8CE]
+                      bg-white flex items-center justify-center transition-all duration-200
+                      flex-shrink-0"></div>
+        </label>
+
+      </div>
       <p class="text-[1.2rem] font-extrabold text-[#492F48] mb-4">Pilih Level</p>
 
       {{-- Level list --}}
@@ -221,15 +281,16 @@
 
       </div>{{-- /level-list --}}
 
-      <button class="block w-full py-4 rounded-[18px] bg-[#C82D85] text-white
-                     text-[1.05rem] font-extrabold text-center border-0 cursor-pointer
-                     shadow-[0_8px_28px_rgba(200,45,133,0.38)] transition-all duration-200
-                     hover:bg-[#951651] hover:-translate-y-0.5
-                     hover:shadow-[0_14px_36px_rgba(200,45,133,0.5)]
-                     disabled:bg-[#D8A8CE] disabled:shadow-none
-                     disabled:cursor-not-allowed disabled:translate-y-0"
-              id="btn-mulai" disabled onclick="mulaiKuis()">
-        Mulai Kuis
+      <button id="btn-mulai"
+              onclick="mulaiKuis()"
+              disabled
+              class="w-full py-[15px] rounded-[16px] bg-[#C82D85] text-white
+                    font-extrabold text-[1.05rem]
+                    shadow-[0_6px_20px_rgba(200,45,133,0.32)]
+                    transition-all duration-200
+                    hover:bg-[#951651] hover:-translate-y-0.5
+                    disabled:opacity-40 disabled:cursor-not-allowed disabled:transform-none">
+        Mulai Kuis →
       </button>
     </div>{{-- /screen-level --}}
 
@@ -240,16 +301,36 @@
     <div id="screen-soal" class="animate-fadeIn" style="display:none;">
 
       {{-- Top bar --}}
-      <div class="flex items-center gap-[14px] mb-[18px]">
+      {{-- Badge bahasa & level --}}
+      <div class="flex gap-2 mb-4" id="badge-info">
+        <span id="badge-bahasa"
+              class="px-3 py-1 rounded-full bg-[#C82D85] text-white text-[0.78rem] font-bold uppercase">
+          BISINDO
+        </span>
+        <span id="badge-level"
+              class="px-3 py-1 rounded-full bg-[#F2B8D8] text-[#C82D85] text-[0.78rem] font-bold capitalize">
+          Pemula
+        </span>
+      </div>
+<div class="flex items-center justify-between mb-3">
+
+      <div class="flex items-center gap-3">
         <button class="w-9 h-9 rounded-full flex items-center justify-center
-                       text-[18px] text-[#742958] bg-transparent border-0
-                       cursor-pointer transition-colors duration-200
-                       hover:text-[#C82D85] flex-shrink-0"
+                      text-[18px] text-[#742958] bg-transparent border-0
+                      cursor-pointer transition-colors duration-200
+                      hover:text-[#C82D85] flex-shrink-0"
                 onclick="kembaliKeLevel()">&#8592;</button>
-        <span class="text-[0.95rem] font-bold text-[#492F48]"
+
+        <span class="text-[0.82rem] text-[#9B6898] font-semibold"
               id="soal-label">Soal 1 dari 5</span>
       </div>
 
+      {{-- Timer --}}
+      <span class="text-[0.82rem] font-bold text-[#C82D85] bg-[#FEF0F8]
+                  px-3 py-1 rounded-full border border-[#F2B8D8]"
+            id="timer-display">00:00</span>
+
+    </div>
       {{-- Progress bar --}}
       <div class="w-full h-[10px] bg-[#F7DAED] rounded-full overflow-hidden mb-6">
         <div class="h-full rounded-full transition-[width] duration-500 ease-in-out
@@ -338,7 +419,11 @@
             <div class="text-[0.8rem] text-[#9B6898] font-medium mt-0.5">Total Soal</div>
           </div>
         </div>
-
+        {{-- Review jawaban --}}
+      <div class="mt-6">
+        <p class="text-[1rem] font-extrabold text-[#492F48] mb-3">📋 Review Jawaban</p>
+        <div id="review-container"></div>
+      </div>
         <div class="flex gap-3 flex-wrap">
           <button class="flex-1 py-[14px] rounded-[14px] border-2 border-[#C82D85]
                          text-[#C82D85] bg-white text-[0.95rem] font-bold
@@ -365,79 +450,129 @@
 
 @push('scripts')
 <script>
-const soalBank = {
-  pemula: [
-    { img: 'huruf-a', jawaban: 'A', pilihan: ['A','B','C','D'] },
-    { img: 'huruf-b', jawaban: 'B', pilihan: ['A','B','E','F'] },
-    { img: 'huruf-c', jawaban: 'C', pilihan: ['C','D','G','H'] },
-    { img: 'huruf-d', jawaban: 'D', pilihan: ['B','C','D','E'] },
-    { img: 'huruf-e', jawaban: 'E', pilihan: ['A','E','I','O'] },
-  ],
-  menengah: [
-    { img: 'huruf-f', jawaban: 'F', pilihan: ['E','F','G','H'] },
-    { img: 'huruf-g', jawaban: 'G', pilihan: ['F','G','H','I'] },
-    { img: 'huruf-h', jawaban: 'H', pilihan: ['G','H','I','J'] },
-    { img: 'huruf-i', jawaban: 'I', pilihan: ['H','I','J','K'] },
-    { img: 'huruf-j', jawaban: 'J', pilihan: ['I','J','K','L'] },
-  ],
-  mahir: [
-    { img: 'huruf-v', jawaban: 'V', pilihan: ['U','V','W','X'] },
-    { img: 'huruf-w', jawaban: 'W', pilihan: ['V','W','X','Y'] },
-    { img: 'huruf-x', jawaban: 'X', pilihan: ['W','X','Y','Z'] },
-    { img: 'huruf-y', jawaban: 'Y', pilihan: ['V','X','Y','Z'] },
-    { img: 'huruf-z', jawaban: 'Z', pilihan: ['W','X','Y','Z'] },
-  ],
-};
+// ── TIMER ──
+let timerInterval = null;
+let waktuMulai    = null;  // timestamp saat kuis dimulai
+let durasiDetik   = 0;
+// ── STATE ──
+let currentLevel    = null;
+let currentLanguage = null; // wajib dipilih user
+let soalList        = [];
+let currentIndex    = 0;
+let skorBenar       = 0;
+let answered        = false;
+let answersDetail   = []; // untuk review dan simpan ke DB
 
-let currentLevel = null;
-let soalList     = [];
-let currentIndex = 0;
-let skorBenar    = 0;
-let answered     = false;
+// ── SCREEN 1: Pilih Level ──
 
-// ── SCREEN 1 ──
+function selectBahasa(bahasa, el) {
+  currentLanguage = bahasa;
+  document.querySelectorAll('.bahasa-item').forEach(i => i.classList.remove('selected'));
+  el.classList.add('selected');
+  cekBisaMultai();
+}
+
 function selectLevel(level, el) {
   currentLevel = level;
   document.querySelectorAll('.level-item').forEach(i => i.classList.remove('selected'));
   el.classList.add('selected');
-  document.getElementById('btn-mulai').disabled = false;
+  cekBisaMultai();
 }
 
-function mulaiKuis() {
-  soalList     = [...soalBank[currentLevel]].sort(() => Math.random() - 0.5);
-  currentIndex = 0;
-  skorBenar    = 0;
-  showScreen('soal');
-  renderSoal();
+// Tombol Mulai hanya aktif jika KEDUANYA sudah dipilih
+function cekBisaMultai() {
+  const bisa = currentLanguage !== null && currentLevel !== null;
+  document.getElementById('btn-mulai').disabled = !bisa;
 }
 
-// ── SCREEN 2 ──
+async function mulaiKuis() {
+  if (!currentLevel) return;
+
+  // Tampilkan loading (opsional)
+  document.getElementById('btn-mulai').textContent = 'Memuat soal...';
+  document.getElementById('btn-mulai').disabled = true;
+
+  try {
+    // Fetch soal dari database via API
+    const res  = await fetch(`/latihan/soal?language=${currentLanguage}&level=${currentLevel}`);
+    const data = await res.json();
+
+    if (!data || data.length === 0) {
+      alert('Soal untuk level ini belum tersedia. Silakan coba level lain.');
+      document.getElementById('btn-mulai').textContent = 'Mulai Kuis';
+      document.getElementById('btn-mulai').disabled = false;
+      return;
+    }
+
+    soalList      = data;
+    currentIndex  = 0;
+    skorBenar     = 0;
+    answersDetail = [];
+
+    showScreen('soal');
+    // Mulai timer
+    waktuMulai   = Date.now();
+    durasiDetik  = 0;
+    clearInterval(timerInterval);
+
+    timerInterval = setInterval(() => {
+      durasiDetik = Math.floor((Date.now() - waktuMulai) / 1000);
+      const menit  = String(Math.floor(durasiDetik / 60)).padStart(2, '0');
+      const detik  = String(durasiDetik % 60).padStart(2, '0');
+      const timerEl = document.getElementById('timer-display');
+      if (timerEl) timerEl.textContent = menit + ':' + detik;
+    }, 1000);
+    // Update badge bahasa dan level
+    document.getElementById('badge-bahasa').textContent = currentLanguage.toUpperCase();
+    document.getElementById('badge-level').textContent  =
+      currentLevel.charAt(0).toUpperCase() + currentLevel.slice(1);
+    renderSoal();
+
+  } catch (err) {
+    console.error('Gagal mengambil soal:', err);
+    alert('Terjadi kesalahan. Coba lagi.');
+    document.getElementById('btn-mulai').textContent = 'Mulai Kuis';
+    document.getElementById('btn-mulai').disabled = false;
+  }
+}
+
+// ── SCREEN 2: Soal ──
+
 function renderSoal() {
   answered = false;
   const soal  = soalList[currentIndex];
   const total = soalList.length;
   const nomor = currentIndex + 1;
 
-  document.getElementById('soal-label').textContent    = `Soal dari ${nomor} dari ${total}`;
+  document.getElementById('soal-label').textContent    = `Soal ${nomor} dari ${total}`;
   document.getElementById('quiz-progress').style.width = ((nomor / total) * 100) + '%';
 
+  // Gambar dari database (URL sudah lengkap dari server)
   const imgEl = document.getElementById('soal-img');
   const phEl  = document.getElementById('soal-img-ph');
-  imgEl.src   = `/assets/soal/${soal.img}.png`;
+  imgEl.onerror = function() {
+    // Kalau gambar tidak ada, tampilkan placeholder
+    this.src = 'https://placehold.co/280x280/FEF0F8/C82D85?text=Gesture+' + 
+              soalList[currentIndex].correct_answer;
+  };
+  imgEl.src           = soal.image_url;
   imgEl.style.display = 'block';
   phEl.style.display  = 'none';
 
+  // Reset feedback
   const fb = document.getElementById('soal-feedback');
   fb.className     = 'soal-feedback rounded-[14px] px-[18px] py-[14px] text-[0.95rem] font-bold mt-4';
   fb.style.display = '';
 
+  // Tombol next
   const btnNext = document.getElementById('btn-next');
   btnNext.classList.remove('visible');
   btnNext.textContent = (currentIndex < total - 1) ? 'Soal Berikutnya' : 'Lihat Hasil';
 
+  // Render pilihan jawaban
   const grid     = document.getElementById('pilihan-grid');
   grid.innerHTML = '';
-  const shuffled = [...soal.pilihan].sort(() => Math.random() - 0.5);
+  const shuffled = [...soal.options].sort(() => Math.random() - 0.5);
 
   shuffled.forEach(opt => {
     const item = document.createElement('label');
@@ -455,24 +590,37 @@ function renderSoal() {
       grid.querySelectorAll('.pilihan-item').forEach(i => i.classList.remove('selected'));
       item.classList.add('selected');
       item.querySelector('input').checked = true;
-      pilihJawaban(opt, soal.jawaban);
+      pilihJawaban(opt, soal);
     });
     grid.appendChild(item);
   });
 }
 
-function pilihJawaban(pilihan, jawaban) {
+function pilihJawaban(pilihan, soal) {
   if (answered) return;
   answered = true;
 
-  const benar = pilihan === jawaban;
+  const benar = pilihan === soal.correct_answer;
   const fb    = document.getElementById('soal-feedback');
   const grid  = document.getElementById('pilihan-grid');
 
+  // Simpan detail jawaban untuk review nanti
+  answersDetail.push({
+    question_id:    soal.id,
+    image_url:      soal.image_url,
+    user_answer:    pilihan,
+    correct_answer: soal.correct_answer,
+    explanation:    soal.explanation,
+    is_correct:     benar,
+  });
+
+  if (benar) skorBenar++;
+
+  // Highlight jawaban benar/salah
   grid.querySelectorAll('.pilihan-item').forEach(el => {
     el.classList.add('locked');
     const val = el.querySelector('input').value;
-    if (val === jawaban) {
+    if (val === soal.correct_answer) {
       el.classList.remove('selected');
       el.classList.add('correct');
     } else if (val === pilihan && !benar) {
@@ -481,15 +629,15 @@ function pilihJawaban(pilihan, jawaban) {
     }
   });
 
+  // Feedback
   if (benar) {
-    skorBenar++;
     fb.className = 'soal-feedback benar rounded-[14px] px-[18px] py-[14px] text-[0.95rem] font-bold mt-4 bg-[#E8F8EE] border border-[#5CB87A] text-[#2D6A3F]';
     document.getElementById('fb-title').textContent = '✅ Jawaban Benar!';
-    document.getElementById('fb-sub').textContent   = `Huruf yang ditunjukkan adalah huruf ${jawaban}`;
+    document.getElementById('fb-sub').textContent   = `Huruf yang ditunjukkan adalah ${soal.correct_answer}`;
   } else {
     fb.className = 'soal-feedback salah rounded-[14px] px-[18px] py-[14px] text-[0.95rem] font-bold mt-4 bg-[#FDECEC] border border-[#E57373] text-[#8B2020]';
     document.getElementById('fb-title').textContent = '❌ Jawaban Salah!';
-    document.getElementById('fb-sub').textContent   = `Jawaban yang benar adalah huruf ${jawaban}`;
+    document.getElementById('fb-sub').textContent   = `Jawaban benar: ${soal.correct_answer}. ${soal.explanation ?? ''}`;
   }
 
   document.getElementById('btn-next').classList.add('visible');
@@ -506,8 +654,11 @@ function soalBerikutnya() {
 
 function kembaliKeLevel() { showScreen('level'); }
 
-// ── SCREEN 3 ──
-function tampilkanHasil() {
+// ── SCREEN 3: Hasil ──
+async function tampilkanHasil() {
+  // Hentikan timer
+  clearInterval(timerInterval);
+
   showScreen('hasil');
   const total  = soalList.length;
   const salah  = total - skorBenar;
@@ -522,17 +673,85 @@ function tampilkanHasil() {
 
   const emojiEl = document.getElementById('hasil-emoji');
   const judulEl = document.getElementById('hasil-judul');
-  if (persen === 100)    { emojiEl.textContent = '🏆'; judulEl.textContent = 'Sempurna! Luar Biasa!'; }
-  else if (persen >= 80) { emojiEl.textContent = '🎉'; judulEl.textContent = 'Keren! Hampir Sempurna!'; }
-  else if (persen >= 60) { emojiEl.textContent = '👍'; judulEl.textContent = 'Bagus! Terus Berlatih!'; }
-  else                   { emojiEl.textContent = '💪'; judulEl.textContent = 'Jangan Menyerah, Coba Lagi!'; }
+  if      (persen === 100) { emojiEl.textContent = '🏆'; judulEl.textContent = 'Sempurna! Luar Biasa!'; }
+  else if (persen >= 80)   { emojiEl.textContent = '🎉'; judulEl.textContent = 'Keren! Hampir Sempurna!'; }
+  else if (persen >= 60)   { emojiEl.textContent = '👍'; judulEl.textContent = 'Bagus! Terus Berlatih!'; }
+  else                     { emojiEl.textContent = '💪'; judulEl.textContent = 'Jangan Menyerah, Coba Lagi!'; }
+
+  // Render review jawaban
+  renderReview();
+
+  // Simpan hasil ke database (jika user login)
+  await simpanHasilKuisKeDB(persen, total);
+}
+
+function renderReview() {
+  const container = document.getElementById('review-container');
+  if (!container) return;
+
+  container.innerHTML = '';
+  answersDetail.forEach((item, idx) => {
+    const warna = item.is_correct
+      ? 'bg-[#E8F8EE] border-[#5CB87A]'
+      : 'bg-[#FDECEC] border-[#E57373]';
+    const teks = item.is_correct
+      ? `<span class="text-[#2D6A3F] font-bold">✅ Benar</span>`
+      : `<span class="text-[#8B2020] font-bold">❌ Salah — Jawaban benar: ${item.correct_answer}</span>`;
+
+    container.innerHTML += `
+      <div class="border-2 rounded-[16px] p-4 ${warna} mb-3">
+        <div class="flex items-center gap-3 mb-2">
+          <img src="${item.image_url}" alt="Soal ${idx+1}"
+               class="w-16 h-16 object-contain rounded-xl border border-white shadow">
+          <div>
+            <p class="text-[0.9rem] font-bold text-[#492F48]">Soal ${idx + 1}</p>
+            <p class="text-[0.85rem] text-[#7A4B78]">Jawaban kamu: <strong>${item.user_answer}</strong></p>
+            ${teks}
+          </div>
+        </div>
+        ${!item.is_correct && item.explanation
+          ? `<p class="text-[0.82rem] text-[#7A4B78] mt-1 italic">💡 ${item.explanation}</p>`
+          : ''}
+      </div>
+    `;
+  });
+}
+
+async function simpanHasilKuisKeDB(persen, total) {
+  try {
+    const res = await fetch('/latihan/simpan-hasil', {
+      method: 'POST',
+      headers: {
+        'Content-Type':  'application/json',
+        'X-CSRF-TOKEN':  document.querySelector('meta[name="csrf-token"]').content,
+      },
+      body: JSON.stringify({
+        language:        currentLanguage,
+        level:           currentLevel,
+        total_questions: total,
+        correct_answers: skorBenar,
+        answers_detail:  answersDetail,
+        duration_seconds: durasiDetik,
+      }),
+    });
+    const data = await res.json();
+    console.log('Hasil tersimpan:', data);
+  } catch (err) {
+    // Tidak perlu tampilkan error ke user, gagal simpan tidak bloking
+    console.warn('Gagal menyimpan hasil:', err);
+  }
 }
 
 function ulangiKuis() {
-  currentIndex = 0;
-  skorBenar    = 0;
-  soalList     = [...soalBank[currentLevel]].sort(() => Math.random() - 0.5);
+  currentIndex  = 0;
+  skorBenar     = 0;
+  answersDetail = [];
+  soalList      = [...soalList].sort(() => Math.random() - 0.5);
   showScreen('soal');
+  // Update badge bahasa dan level
+  document.getElementById('badge-bahasa').textContent = currentLanguage.toUpperCase();
+  document.getElementById('badge-level').textContent  =
+    currentLevel.charAt(0).toUpperCase() + currentLevel.slice(1);
   renderSoal();
 }
 
@@ -541,6 +760,7 @@ function showScreen(name) {
   document.getElementById('screen-soal').style.display  = name === 'soal'  ? 'block' : 'none';
   document.getElementById('screen-hasil').style.display = name === 'hasil' ? 'block' : 'none';
 }
+
 </script>
 @endpush
 @include('layout.footer')
