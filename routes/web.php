@@ -50,7 +50,10 @@ Route::get('/faq', function () {
     return view('faq');
 })->name('faq');
 
-Route::get('/profil', [ProfilController::class, 'index'])->name('profile');
+Route::middleware('auth')->group(function () {
+    Route::get('/profil', [ProfilController::class, 'index'])->name('profile');
+    Route::put('/profil', [ProfilController::class, 'update'])->name('profile.update');
+});
 
 
 Route::get('/pembelajaran.index', [PembelajaranController::class, 'index'])->name('pembelajaran.index');

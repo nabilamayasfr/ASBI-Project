@@ -116,9 +116,9 @@
       <div class="w-[52px] h-[52px] rounded-[14px] shrink-0 flex items-center justify-center
                   bg-[linear-gradient(135deg,_#F1A2D0,_#C82D85)]
                   shadow-[0_3px_6px_rgba(200,45,133,0.25)]">
-        <img 
-            src="{{ asset($item['tipe'] === 'kuis' 
-                ? 'assets/icon-kuis.png' 
+        <img
+            src="{{ asset($item['tipe'] === 'kuis'
+                ? 'assets/icon-kuis.png'
                 : 'assets/icon-praktik.png') }}"
             alt="Icon"
             class="w-8 h-8 object-contain"
@@ -146,7 +146,6 @@
     </div>
   @empty
     <div class="text-center py-16 px-6">
-      <div class="text-[3rem] mb-3">📭</div>
       <p class="text-[1rem] font-bold text-[#492F48] mb-1">Belum ada riwayat belajar</p>
       <p class="text-[0.88rem] text-[#9B6898]">Yuk mulai latihan pertamamu!</p>
       <a href="{{ route('latihan') }}"
@@ -540,7 +539,7 @@ function bukaModal(data) {
     bukaKuis(data);
   } else {
     // Fitur praktik belum tersedia
-    alert('Fitur detail praktik akan segera hadir! 🤟');
+    alert('Fitur detail praktik akan segera hadir!');
   }
 }
 

@@ -9,143 +9,129 @@
 <div class="w-full" style="background-color: #FEE6F2;">
     <div class="px-6 py-5 max-w-5xl mx-auto">
 
-        {{-- Notifikasi Toast --}}
-        <div id="toastMessage" class="fixed top-20 right-6 z-50 hidden transition-all duration-300">
-            <div class="bg-green-500 text-white px-5 py-3 rounded-xl shadow-lg flex items-center gap-3">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                </svg>
-                <span id="toastText">Perubahan berhasil disimpan!</span>
-            </div>
+        {{-- Notifikasi Session --}}
+        @if(session('success'))
+        <div id="successMessage" class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-xl relative">
+            <span class="block sm:inline">{{ session('success') }}</span>
         </div>
+        @endif
+
+        @if(session('error'))
+        <div id="errorMessage" class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl relative">
+            <span class="block sm:inline">{{ session('error') }}</span>
+        </div>
+        @endif
+
+        @if($errors->any())
+        <div class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl relative">
+            <ul class="list-disc list-inside">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+        @endif
 
         {{-- ===== INFORMASI AKUN ===== --}}
         <div class="bg-white rounded-2xl shadow-sm border border-pink-100 p-6 mb-6">
-            <div class="flex justify-between items-start flex-wrap gap-6">
+            <h2 class="text-lg font-extrabold text-gray-800 mb-4">Informasi Akun</h2>
 
-                {{-- Form Kiri --}}
-                <div class="flex-1 min-w-[280px]">
-                    <h2 class="text-lg font-extrabold text-gray-800 mb-4">Informasi Akun</h2>
+            {{-- PERHATIAN: action menggunakan route('profile.update') --}}
+            <form action="{{ route('profile.update') }}" method="POST" class="space-y-4">
+                @csrf
+                @method('PUT')
 
-                    <form id="profileForm" method="POST" class="space-y-3">
-                        @csrf
-                        @method('PUT')
-
-                        {{-- Nama Lengkap --}}
-                        <div>
-                            <label class="block text-xs text-gray-500 mb-1 ml-1">Nama Lengkap</label>
-                            <input type="text" name="nama_lengkap" id="namaLengkap" value="Arabella"
-                                class="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-pink-300 transition" />
-                            <p class="text-red-500 text-xs mt-1 ml-1 hidden" id="errorNama">Nama lengkap harus diisi</p>
-                        </div>
-
-                        {{-- Username --}}
-                        <div>
-                            <label class="block text-xs text-gray-500 mb-1 ml-1">Username</label>
-                            <input type="text" name="username" id="username" value="Arabella123"
-                                class="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-pink-300 transition" />
-                            <p class="text-red-500 text-xs mt-1 ml-1 hidden" id="errorUsername">Username harus diisi</p>
-                        </div>
-
-                        {{-- Email --}}
-                        <div>
-                            <label class="block text-xs text-gray-500 mb-1 ml-1">Email</label>
-                            <input type="email" name="email" id="email" value="Arabella@gmail.com"
-                                class="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-pink-300 transition" />
-                            <p class="text-red-500 text-xs mt-1 ml-1 hidden" id="errorEmail">Email tidak valid</p>
-                        </div>
-
-                        {{-- No. Telepon --}}
-                        <div>
-                            <label class="block text-xs text-gray-500 mb-1 ml-1">No. Telepon</label>
-                            <input type="tel" name="no_telephone" id="noTelepon" value="08123456789"
-                                class="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-pink-300 transition" />
-                            <p class="text-red-500 text-xs mt-1 ml-1 hidden" id="errorTelepon">Nomor telepon harus diisi</p>
-                        </div>
-
-                        {{-- Password & Ganti Password --}}
-                        <div class="flex gap-3 flex-wrap">
-                            <div class="flex-1 min-w-[150px]">
-                                <label class="block text-xs text-gray-500 mb-1 ml-1">Password</label>
-                                <input type="password" name="password" id="passwordField" value="************"
-                                    class="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-pink-300 transition"
-                                    readonly disabled />
-                            </div>
-                            <div class="flex items-end">
-                                <button type="button" onclick="toggleGantiPassword()"
-                                    class="px-5 py-2 rounded-xl text-xs font-semibold border-2 border-pink-300 text-pink-500 hover:bg-pink-50 transition whitespace-nowrap">
-                                    Ganti Password
-                                </button>
-                            </div>
-                        </div>
-
-                        {{-- Konfirmasi Sandi Baru (hidden by default) --}}
-                        <div id="konfirmasiSection" class="hidden">
-                            <label class="block text-xs text-gray-500 mb-1 ml-1">Konfirmasi Sandi Baru</label>
-                            <input type="password" name="password_confirmation" id="passwordConfirm"
-                                class="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-pink-300 transition"
-                                placeholder="Masukkan konfirmasi sandi baru" />
-                            <p id="errorConfirm" class="text-red-500 text-xs mt-1 ml-1 hidden">Kata sandi tidak cocok.</p>
-                        </div>
-
-                        {{-- Tombol Simpan Perubahan --}}
-                        <div class="pt-3 flex gap-3">
-                            <button type="submit"
-                                class="px-6 py-2 rounded-xl text-white text-sm font-semibold transition hover:opacity-90"
-                                style="background-color: #D96FAD;">
-                                Simpan Perubahan
-                            </button>
-                            <button type="button" onclick="resetForm()"
-                                class="px-6 py-2 rounded-xl text-sm font-semibold border-2 border-gray-300 text-gray-600 hover:bg-gray-100 transition">
-                                Batal
-                            </button>
-                        </div>
-
-                    </form>
+                {{-- Nama Lengkap --}}
+                <div>
+                    <label class="block text-xs text-gray-500 mb-1 ml-1">Nama Lengkap</label>
+                    <input type="text" name="nama_lengkap"
+                        value="{{ old('nama_lengkap', $user->name) }}"
+                        class="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-pink-300 transition @error('nama_lengkap') border-red-500 @enderror" />
+                    @error('nama_lengkap')
+                        <p class="text-red-500 text-xs mt-1 ml-1">{{ $message }}</p>
+                    @enderror
                 </div>
 
-                {{-- Foto Profil Kanan --}}
-                <div class="flex flex-col items-center gap-3 min-w-[160px]">
-                    <p class="text-xs font-semibold text-gray-500">Foto Profil</p>
+                {{-- Username --}}
+                <div>
+                    <label class="block text-xs text-gray-500 mb-1 ml-1">Username</label>
+                    <input type="text" name="username"
+                        value="{{ old('username', $user->username) }}"
+                        class="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-pink-300 transition @error('username') border-red-500 @enderror" />
+                    @error('username')
+                        <p class="text-red-500 text-xs mt-1 ml-1">{{ $message }}</p>
+                    @enderror
+                </div>
 
-                    {{-- Avatar --}}
-                    <div class="relative">
-                        <div id="avatarContainer" class="w-28 h-28 rounded-full flex items-center justify-center relative overflow-hidden border-4 border-pink-200 cursor-pointer"
-                             style="background: linear-gradient(135deg, #F9A8D4, #C07EB5);"
-                             onclick="document.getElementById('fotoInput').click()">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-14 h-14 text-white" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
-                            </svg>
-                            <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 hover:opacity-100 transition">
-                                <span class="text-white text-xs font-medium">Edit</span>
-                            </div>
-                        </div>
+                {{-- Email --}}
+                <div>
+                    <label class="block text-xs text-gray-500 mb-1 ml-1">Email</label>
+                    <input type="email" name="email"
+                        value="{{ old('email', $user->email) }}"
+                        class="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-pink-300 transition @error('email') border-red-500 @enderror" />
+                    @error('email')
+                        <p class="text-red-500 text-xs mt-1 ml-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                {{-- No. Telepon --}}
+                <div>
+                    <label class="block text-xs text-gray-500 mb-1 ml-1">No. Telepon</label>
+                    <input type="tel" name="nomor_telepon"
+                        value="{{ old('nomor_telepon', $user->phone) }}"
+                        class="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-pink-300 transition @error('nomor_telepon') border-red-500 @enderror" />
+                    @error('nomor_telepon')
+                        <p class="text-red-500 text-xs mt-1 ml-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <hr class="my-4 border-gray-200">
+
+                {{-- Ganti Password --}}
+                <div>
+                    <div class="flex justify-between items-center mb-2">
+                        <label class="block text-xs text-gray-500 ml-1">Password Baru (Opsional)</label>
+                        <button type="button" onclick="togglePassword()"
+                            class="text-xs text-pink-500 hover:text-pink-600 font-semibold">
+                            Ganti Password
+                        </button>
                     </div>
 
-                    <p class="text-xs text-gray-400 text-center leading-tight">Klik foto untuk mengubah<br>
-                        <span class="text-gray-300">format PNG, JPG, JPEG</span>
-                    </p>
+                    <div id="passwordSection" style="display: none;">
+                        <input type="password" name="password" id="password"
+                            placeholder="Masukkan password baru (minimal 8 karakter)"
+                            class="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-pink-300 transition mb-2" />
+                        @error('password')
+                            <p class="text-red-500 text-xs mt-1 ml-1">{{ $message }}</p>
+                        @enderror
 
-                    <input type="file" id="fotoInput" accept="image/png, image/jpeg, image/jpg" class="hidden" onchange="previewFoto(event)">
+                        <input type="password" name="password_confirmation" id="password_confirmation"
+                            placeholder="Konfirmasi password baru"
+                            class="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-pink-300 transition" />
+                    </div>
+                </div>
 
-                    <button type="button" onclick="removeFoto()"
-                        class="w-full py-1.5 rounded-xl text-xs font-semibold border-2 border-red-300 text-red-500 hover:bg-red-50 transition">
-                        Hapus Foto
+                {{-- Tombol Simpan --}}
+                <div class="pt-3">
+                    <button type="submit"
+                        class="px-6 py-2 rounded-xl text-white text-sm font-semibold transition hover:opacity-90"
+                        style="background-color: #D96FAD;">
+                        Simpan Perubahan
                     </button>
                 </div>
 
-            </div>
+            </form>
         </div>
 
-        {{-- ===== STATISTIK (HANYA 2 KOLOM: Total Latihan & Huruf Terakhir) ===== --}}
+        {{-- ===== STATISTIK ===== --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
             <div class="bg-white rounded-2xl shadow-sm border border-pink-100 p-5 text-center hover:shadow-md transition">
                 <p class="text-sm text-gray-500 font-medium">Total Latihan</p>
-                <p class="text-4xl font-extrabold text-gray-800 mt-1" id="totalLatihan">25</p>
+                <p class="text-4xl font-extrabold text-gray-800 mt-1">{{ $totalLatihan ?? 0 }}</p>
             </div>
             <div class="bg-white rounded-2xl shadow-sm border border-pink-100 p-5 text-center hover:shadow-md transition">
                 <p class="text-sm text-gray-500 font-medium">Huruf Terakhir</p>
-                <p class="text-4xl font-extrabold text-gray-800 mt-1" id="hurufTerakhir">K</p>
+                <p class="text-4xl font-extrabold text-gray-800 mt-1">{{ $hurufTerakhir ?? '-' }}</p>
             </div>
         </div>
 
@@ -154,330 +140,36 @@
             <div class="flex items-center gap-2 mb-1">
                 <h3 class="font-extrabold text-gray-800">Kemajuan Belajar</h3>
             </div>
-            <p class="text-gray-500 text-sm mb-3">Kamu sudah menguasai <span class="font-semibold text-gray-700" id="progressCount">12</span>/26 huruf (<span id="progressPercent">46</span>%)</p>
+            <p class="text-gray-500 text-sm mb-3">Kamu sudah menguasai <span class="font-semibold text-gray-700">{{ $progressCount ?? 0 }}</span>/26 huruf (<span>{{ $progressPercent ?? 0 }}</span>%)</p>
             <div class="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
                 <div class="h-3 rounded-full transition-all duration-500"
-                     style="width: 46%; background: linear-gradient(90deg, #F472B6, #DB2777);" id="progressBar"></div>
+                     style="width: {{ $progressPercent ?? 0 }}%; background: linear-gradient(90deg, #F472B6, #DB2777);"></div>
             </div>
-            <p class="text-xs text-gray-400 mt-1">(<span id="progressPercentText">46</span>% filled)</p>
         </div>
     </div>
 </div>
 
-@push('scripts')
 <script>
-    // Data user (simulasi localStorage)
-    let userData = {
-        nama_lengkap: 'Arabella',
-        username: 'Arabella123',
-        email: 'Arabella@gmail.com',
-        no_telephone: '08123456789',
-        password: '12345678',
-        foto: null
-    };
-
-    let isChangingPassword = false;
-    let newPassword = '';
-
-    // Load data dari localStorage
-    function loadUserData() {
-        const stored = localStorage.getItem('userProfile');
-        if (stored) {
-            userData = JSON.parse(stored);
-            updateFormValues();
-        }
-
-        // Load progress dari pembelajaran
-        const mastered = localStorage.getItem('signlearn_mastered');
-        if (mastered) {
-            const masteredLetters = JSON.parse(mastered);
-            const count = masteredLetters.length;
-            const percent = Math.floor((count / 26) * 100);
-            document.getElementById('progressCount').innerText = count;
-            document.getElementById('progressPercent').innerText = percent;
-            document.getElementById('progressPercentText').innerText = percent;
-            document.getElementById('progressBar').style.width = `${percent}%`;
-
-            // Update huruf terakhir
-            if (masteredLetters.length > 0) {
-                document.getElementById('hurufTerakhir').innerText = masteredLetters[masteredLetters.length - 1];
-            }
-
-            // Update total latihan
-            document.getElementById('totalLatihan').innerText = masteredLetters.length;
-        }
-    }
-
-    function updateFormValues() {
-        document.getElementById('namaLengkap').value = userData.nama_lengkap;
-        document.getElementById('username').value = userData.username;
-        document.getElementById('email').value = userData.email;
-        document.getElementById('noTelepon').value = userData.no_telephone;
-        document.getElementById('userNameNav').innerText = userData.nama_lengkap.split(' ')[0];
-
-        // Update avatar huruf awal
-        const firstLetter = userData.nama_lengkap.charAt(0).toUpperCase();
-        const avatarDiv = document.querySelector('#avatarContainer');
-        if (!userData.foto) {
-            avatarDiv.innerHTML = `
-                <div class="w-full h-full flex items-center justify-center" style="background: linear-gradient(135deg, #F9A8D4, #C07EB5);">
-                    <span class="text-3xl font-bold text-white">${firstLetter}</span>
-                </div>
-                <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 hover:opacity-100 transition">
-                    <span class="text-white text-xs font-medium">Edit</span>
-                </div>
-            `;
-        }
-    }
-
-    // Toggle section ganti password
-    function toggleGantiPassword() {
-        const section = document.getElementById('konfirmasiSection');
-        const passwordField = document.getElementById('passwordField');
-
-        isChangingPassword = !isChangingPassword;
-
-        if (isChangingPassword) {
-            section.classList.remove('hidden');
-            passwordField.removeAttribute('readonly');
-            passwordField.removeAttribute('disabled');
-            passwordField.value = '';
-            passwordField.placeholder = 'Masukkan sandi baru';
-            passwordField.focus();
+    // Toggle password section
+    function togglePassword() {
+        const section = document.getElementById('passwordSection');
+        if (section.style.display === 'none' || section.style.display === '') {
+            section.style.display = 'block';
         } else {
-            section.classList.add('hidden');
-            passwordField.setAttribute('readonly', true);
-            passwordField.setAttribute('disabled', true);
-            passwordField.value = '************';
-            passwordField.placeholder = '';
-            document.getElementById('passwordConfirm').value = '';
-            document.getElementById('errorConfirm').classList.add('hidden');
+            section.style.display = 'none';
+            document.getElementById('password').value = '';
+            document.getElementById('password_confirmation').value = '';
         }
     }
 
-    // Validasi form
-    function validateForm() {
-        let isValid = true;
-
-        const nama = document.getElementById('namaLengkap').value.trim();
-        if (!nama) {
-            document.getElementById('errorNama').classList.remove('hidden');
-            isValid = false;
-        } else {
-            document.getElementById('errorNama').classList.add('hidden');
-        }
-
-        const username = document.getElementById('username').value.trim();
-        if (!username) {
-            document.getElementById('errorUsername').classList.remove('hidden');
-            isValid = false;
-        } else {
-            document.getElementById('errorUsername').classList.add('hidden');
-        }
-
-        const email = document.getElementById('email').value.trim();
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!email || !emailRegex.test(email)) {
-            document.getElementById('errorEmail').classList.remove('hidden');
-            isValid = false;
-        } else {
-            document.getElementById('errorEmail').classList.add('hidden');
-        }
-
-        const telepon = document.getElementById('noTelepon').value.trim();
-        if (!telepon) {
-            document.getElementById('errorTelepon').classList.remove('hidden');
-            isValid = false;
-        } else {
-            document.getElementById('errorTelepon').classList.add('hidden');
-        }
-
-        // Validasi password jika sedang ganti password
-        if (isChangingPassword) {
-            const newPass = document.getElementById('passwordField').value;
-            const confirmPass = document.getElementById('passwordConfirm').value;
-
-            if (newPass.length < 6) {
-                document.getElementById('errorConfirm').innerText = 'Password minimal 6 karakter';
-                document.getElementById('errorConfirm').classList.remove('hidden');
-                isValid = false;
-            } else if (newPass !== confirmPass) {
-                document.getElementById('errorConfirm').innerText = 'Kata sandi tidak cocok.';
-                document.getElementById('errorConfirm').classList.remove('hidden');
-                isValid = false;
-            } else {
-                document.getElementById('errorConfirm').classList.add('hidden');
-                newPassword = newPass;
-            }
-        }
-
-        return isValid;
-    }
-
-    // Tampilkan notifikasi
-    function showToast(message, type = 'success') {
-        const toast = document.getElementById('toastMessage');
-        const toastText = document.getElementById('toastText');
-        const toastDiv = toast.querySelector('div');
-
-        toastText.innerText = message;
-
-        if (type === 'success') {
-            toastDiv.className = 'bg-green-500 text-white px-5 py-3 rounded-xl shadow-lg flex items-center gap-3';
-        } else {
-            toastDiv.className = 'bg-red-500 text-white px-5 py-3 rounded-xl shadow-lg flex items-center gap-3';
-        }
-
-        toast.classList.remove('hidden');
-        toast.style.opacity = '0';
-        toast.style.transform = 'translateX(20px)';
-
-        setTimeout(() => {
-            toast.style.opacity = '1';
-            toast.style.transform = 'translateX(0)';
-        }, 10);
-
-        setTimeout(() => {
-            toast.style.opacity = '0';
-            toast.style.transform = 'translateX(20px)';
-            setTimeout(() => {
-                toast.classList.add('hidden');
-            }, 300);
-        }, 3000);
-    }
-
-    // Simpan perubahan
-    function saveProfile(event) {
-        event.preventDefault();
-
-        if (!validateForm()) {
-            showToast('Mohon lengkapi data dengan benar', 'error');
-            return;
-        }
-
-        // Update data user
-        userData.nama_lengkap = document.getElementById('namaLengkap').value.trim();
-        userData.username = document.getElementById('username').value.trim();
-        userData.email = document.getElementById('email').value.trim();
-        userData.no_telephone = document.getElementById('noTelepon').value.trim();
-
-        if (isChangingPassword && newPassword) {
-            userData.password = newPassword;
-        }
-
-        // Simpan ke localStorage
-        localStorage.setItem('userProfile', JSON.stringify(userData));
-
-        // Update tampilan
-        updateFormValues();
-
-        // Reset password change mode
-        if (isChangingPassword) {
-            toggleGantiPassword();
-        }
-
-        showToast('Perubahan berhasil disimpan!');
-    }
-
-    // Reset form
-    function resetForm() {
-        updateFormValues();
-
-        if (isChangingPassword) {
-            toggleGantiPassword();
-        }
-
-        showToast('Perubahan dibatalkan', 'info');
-    }
-
-    // Preview foto profil
-    function previewFoto(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-
-        // Validasi tipe file
-        if (!file.type.match('image/jpeg') && !file.type.match('image/png') && !file.type.match('image/jpg')) {
-            showToast('Format file harus PNG, JPG, atau JPEG', 'error');
-            return;
-        }
-
-        // Validasi ukuran (max 2MB)
-        if (file.size > 2 * 1024 * 1024) {
-            showToast('Ukuran file maksimal 2MB', 'error');
-            return;
-        }
-
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const avatarContainer = document.getElementById('avatarContainer');
-            userData.foto = e.target.result;
-            localStorage.setItem('userProfile', JSON.stringify(userData));
-
-            avatarContainer.innerHTML = `
-                <img src="${e.target.result}" class="w-full h-full object-cover" />
-                <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 hover:opacity-100 transition">
-                    <span class="text-white text-xs font-medium">Edit</span>
-                </div>
-            `;
-            showToast('Foto profil berhasil diubah!');
-        };
-        reader.readAsDataURL(file);
-    }
-
-    // Hapus foto
-    function removeFoto() {
-        userData.foto = null;
-        localStorage.setItem('userProfile', JSON.stringify(userData));
-
-        const firstLetter = userData.nama_lengkap.charAt(0).toUpperCase();
-        const avatarContainer = document.getElementById('avatarContainer');
-        avatarContainer.innerHTML = `
-            <div class="w-full h-full flex items-center justify-center" style="background: linear-gradient(135deg, #F9A8D4, #C07EB5);">
-                <span class="text-3xl font-bold text-white">${firstLetter}</span>
-            </div>
-            <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 hover:opacity-100 transition">
-                <span class="text-white text-xs font-medium">Edit</span>
-            </div>
-        `;
-        showToast('Foto profil dihapus');
-    }
-
-    // Logout
-    function logout() {
-        if (confirm('Apakah Anda yakin ingin keluar?')) {
-            localStorage.removeItem('userProfile');
-            window.location.href = '/login';
-        }
-    }
-
-    // Konfirmasi password realtime
-    const passwordConfirm = document.getElementById('passwordConfirm');
-    if (passwordConfirm) {
-        passwordConfirm.addEventListener('input', () => {
-            const passwordField = document.getElementById('passwordField');
-            const errorConfirm = document.getElementById('errorConfirm');
-
-            if (passwordConfirm.value !== passwordField.value) {
-                errorConfirm.classList.remove('hidden');
-                errorConfirm.innerText = 'Kata sandi tidak cocok.';
-                passwordConfirm.classList.add('border-red-400');
-            } else if (passwordField.value.length < 6 && passwordField.value.length > 0) {
-                errorConfirm.classList.remove('hidden');
-                errorConfirm.innerText = 'Password minimal 6 karakter';
-                passwordConfirm.classList.add('border-red-400');
-            } else {
-                errorConfirm.classList.add('hidden');
-                passwordConfirm.classList.remove('border-red-400');
-            }
-        });
-    }
-
-    // Event listener form
-    document.getElementById('profileForm').addEventListener('submit', saveProfile);
-
-    // Load data saat halaman dimuat
-    loadUserData();
+    // Auto hide messages after 3 seconds
+    setTimeout(function() {
+        const successMsg = document.getElementById('successMessage');
+        const errorMsg = document.getElementById('errorMessage');
+        if (successMsg) successMsg.style.display = 'none';
+        if (errorMsg) errorMsg.style.display = 'none';
+    }, 3000);
 </script>
-@endpush
+
 @include('layout.footer')
 @endsection
