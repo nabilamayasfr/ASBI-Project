@@ -53,7 +53,7 @@
 
                 {{-- Email / Nama Pengguna --}}
                 <div>
-                    <label class="block text-xs text-gray-600 mb-1 ml-1">Email / Nama Pengguna</label>
+                    <label class="block text-xs text-gray-600 mb-1 ml-1">Email</label>
                     <input type="text" name="login"
                         value="{{ old('login') }}"
                         autocomplete="username"

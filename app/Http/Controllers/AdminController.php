@@ -3,25 +3,29 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\User;
 
-class AdminController extends Controller {
-   public function dashboard()
+class AdminController extends Controller
 {
-    return view('admin-dashboard');
-}
+    public function dashboard()
+    {
+        return view('admin-dashboard');
+    }
 
-public function pengguna()
-{
-    return view('admin_akun');
-}
+    public function pengguna()
+    {
+        $users = User::latest()->get();
 
-public function modul()
-{
-    return view('admin-modul');
-}
+        return view('admin_akun', compact('users'));
+    }
 
-public function kuis()
-{
-    return view('admin_kuis');
-}
+    public function modul()
+    {
+        return view('admin-modul');
+    }
+
+    public function kuis()
+    {
+        return view('admin_kuis');
+    }
 }

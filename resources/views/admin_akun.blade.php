@@ -27,7 +27,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M17 20h5v-2a4 4 0 00-5-3.87M9 20H4v-2a4 4 0 015-3.87m6-4.13a4 4 0 10-8 0 4 4 0 008 0z"/>
             </svg>
-            <span class="text-3xl font-extrabold text-gray-800">150</span>
+            <span class="text-3xl font-extrabold text-gray-800">{{ $users->count() }}</span>
         </div>
         <p class="text-sm font-bold text-blue-600">Total Pengguna</p>
     </div>
@@ -39,7 +39,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M17 20h5v-2a4 4 0 00-5-3.87M9 20H4v-2a4 4 0 015-3.87m6-4.13a4 4 0 10-8 0 4 4 0 008 0z"/>
             </svg>
-            <span class="text-3xl font-extrabold text-gray-800">100</span>
+            <span class="text-3xl font-extrabold text-gray-800">{{ $users->count() }}</span>
         </div>
         <p class="text-sm font-bold text-green-600">Pengguna Aktif</p>
     </div>
@@ -51,7 +51,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M17 20h5v-2a4 4 0 00-5-3.87M9 20H4v-2a4 4 0 015-3.87m6-4.13a4 4 0 10-8 0 4 4 0 008 0z"/>
             </svg>
-            <span class="text-3xl font-extrabold text-gray-800">50</span>
+            <span class="text-3xl font-extrabold text-gray-800">0</span>
         </div>
         <p class="text-sm font-bold text-red-500">Pengguna Non Aktif</p>
     </div>
@@ -83,33 +83,20 @@
 
     {{-- Rows --}}
     <div class="space-y-2" id="userList">
-        @php
-            $users = [
-                ['nama' => 'Arabella', 'email' => 'arabella@mail.com', 'status' => 'Non Aktif'],
-                ['nama' => 'Budi Santoso', 'email' => 'budi@mail.com', 'status' => 'Aktif'],
-                ['nama' => 'Citra Dewi', 'email' => 'citra@mail.com', 'status' => 'Non Aktif'],
-                ['nama' => 'Dian Sastro', 'email' => 'dian@mail.com', 'status' => 'Aktif'],
-                ['nama' => 'Eko Prasetyo', 'email' => 'eko@mail.com', 'status' => 'Non Aktif'],
-            ];
-        @endphp
 
         @foreach($users as $user)
-        <div class="user-row grid grid-cols-4 items-center bg-white border border-gray-100 rounded-xl px-4 py-3 shadow-sm text-sm">
-            <span class="font-semibold text-gray-800 user-name">{{ $user['nama'] }}</span>
-            <span class="text-gray-500 user-email">{{ $user['email'] }}</span>
-            <span class="user-status">
-                @if($user['status'] === 'Aktif')
-                    <span class="px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-600">Aktif</span>
-                @else
-                    <span class="px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-500">Non Aktif</span>
-                @endif
-            </span>
+<div class="user-row grid grid-cols-4 items-center bg-white border border-gray-100 rounded-xl px-4 py-3 shadow-sm text-sm">
+    <span class="font-semibold text-gray-800 user-name">{{ $user->name }}</span>
+    <span class="text-gray-500 user-email">{{ $user->email }}</span>
+    <span class="user-status">
+        <span class="px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-600">Aktif</span>
+    </span>
             <span class="flex items-center gap-2">
                 {{-- Tombol Edit (style seperti modul) --}}
                 <button onclick="openEditModal(this)"
-                        data-nama="{{ $user['nama'] }}"
-                        data-email="{{ $user['email'] }}"
-                        data-status="{{ $user['status'] }}"
+                        data-nama="{{ $user->name }}"
+data-email="{{ $user->email }}"
+data-status="Aktif"
                         class="px-3 py-1 rounded-lg text-xs font-bold border-2 border-yellow-400 text-yellow-600 hover:bg-yellow-50 transition">
                     Edit
                 </button>
