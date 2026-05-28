@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\Modul;
 
 class AdminController extends Controller
 {
@@ -21,7 +22,37 @@ class AdminController extends Controller
 
     public function modul()
     {
-        return view('admin-modul');
+        $moduls = Modul::orderBy('modul')->orderBy('huruf')->get();
+
+        $bisindo = $moduls->where('modul', 'BISINDO');
+        $sibi = $moduls->where('modul', 'SIBI');
+
+        return view('admin-modul', compact('moduls', 'bisindo', 'sibi'));
+    }
+
+    public function storeModul(Request $request)
+    {
+        $request->validate([
+            'modul' => 'required|in:SIBI,BISINDO',
+            'huruf' => 'required|string|size:1',
+            'thumbnail' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'penjelasan' => 'nullable|string',
+        ]);
+
+        $thumbnailPath = null;
+
+        if ($request->hasFile('thumbnail')) {
+            $thumbnailPath = $request->file('thumbnail')->store('modul-thumbnails', 'public');
+        }
+
+        Modul::create([
+            'modul' => strtoupper($request->modul),
+            'huruf' => strtoupper($request->huruf),
+            'thumbnail' => $thumbnailPath,
+            'penjelasan' => $request->penjelasan,
+        ]);
+
+        return redirect()->route('admin.modul')->with('success', 'Modul berhasil ditambahkan.');
     }
 
     public function kuis()
