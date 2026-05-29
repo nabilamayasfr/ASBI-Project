@@ -40,7 +40,7 @@
     <div class="rounded-2xl p-5 bg-[#EDD5F7]">
         <div class="flex items-center gap-2 mb-2">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-[#7B2FBE]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332-.477-4.5-1.253"/>
             </svg>
             <span class="text-3xl font-extrabold text-gray-800" id="stat-total">{{ $moduls->count() }}</span>
         </div>
@@ -75,7 +75,7 @@
         <span class="px-4 py-1 rounded-full text-xs font-extrabold text-white bg-[#C82D85]">BISINDO</span>
     </div>
 
-    <p class="text-gray-400 text-sm mb-5">Klik kartu huruf untuk melihat detail.</p>
+    <p class="text-gray-400 text-sm mb-5">Klik kartu huruf untuk melihat detail atau mengedit.</p>
 
     <div class="mb-4">
         <div class="flex items-center gap-2 border border-gray-200 rounded-xl px-4 py-2 w-52 bg-gray-50">
@@ -90,6 +90,8 @@
     <div class="flex flex-wrap gap-3" id="bisindo-grid">
         @foreach($bisindo as $item)
             <div class="huruf-card cursor-pointer group relative w-32 rounded-2xl border border-gray-100 bg-white shadow-sm overflow-hidden transition hover:-translate-y-1 hover:shadow-lg hover:border-pink-300"
+                 data-id="{{ $item->id }}"
+                 data-update-url="{{ route('admin.modul.update', $item->id) }}"
                  data-modul="{{ $item->modul }}"
                  data-huruf="{{ $item->huruf }}"
                  data-penjelasan="{{ e($item->penjelasan) }}"
@@ -132,7 +134,7 @@
         <span class="px-4 py-1 rounded-full text-xs font-extrabold text-white bg-[#7B2FBE]">SIBI</span>
     </div>
 
-    <p class="text-gray-400 text-sm mb-5">Klik kartu huruf untuk melihat detail.</p>
+    <p class="text-gray-400 text-sm mb-5">Klik kartu huruf untuk melihat detail atau mengedit.</p>
 
     <div class="mb-4">
         <div class="flex items-center gap-2 border border-gray-200 rounded-xl px-4 py-2 w-52 bg-gray-50">
@@ -147,6 +149,8 @@
     <div class="flex flex-wrap gap-3" id="sibi-grid">
         @foreach($sibi as $item)
             <div class="huruf-card cursor-pointer group relative w-32 rounded-2xl border border-gray-100 bg-white shadow-sm overflow-hidden transition hover:-translate-y-1 hover:shadow-lg hover:border-indigo-300"
+                 data-id="{{ $item->id }}"
+                 data-update-url="{{ route('admin.modul.update', $item->id) }}"
                  data-modul="{{ $item->modul }}"
                  data-huruf="{{ $item->huruf }}"
                  data-penjelasan="{{ e($item->penjelasan) }}"
@@ -192,7 +196,15 @@
                 <span class="px-3 py-1 rounded-full text-xs font-extrabold text-white bg-[#C82D85]" id="detailBadge">BISINDO</span>
             </div>
 
-            <button onclick="closeModal('modalDetail')" class="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
+            <div class="flex items-center gap-2">
+                <button type="button"
+                        onclick="openEditModal()"
+                        class="px-4 py-2 rounded-xl text-xs font-bold border-2 border-yellow-400 text-yellow-600 hover:bg-yellow-50 transition">
+                    Edit
+                </button>
+
+                <button onclick="closeModal('modalDetail')" class="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
+            </div>
         </div>
 
         <div class="p-6 space-y-4 max-h-96 overflow-y-auto">
@@ -225,7 +237,7 @@
     </div>
 </div>
 
-{{-- ===== MODAL FORM TAMBAH ===== --}}
+{{-- ===== MODAL FORM TAMBAH / EDIT ===== --}}
 <div id="modalForm" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
     <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg mx-4 overflow-hidden">
 
@@ -234,8 +246,9 @@
             <button type="button" onclick="closeModal('modalForm')" class="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
         </div>
 
-        <form action="{{ route('admin.modul.store') }}" method="POST" enctype="multipart/form-data">
+        <form id="formModul" action="{{ route('admin.modul.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
+            <input type="hidden" name="_method" id="formMethod" value="POST">
 
             <div class="p-6 space-y-4 max-h-96 overflow-y-auto">
 
@@ -256,9 +269,10 @@
 
                 <div>
                     <label class="block text-xs font-bold text-gray-500 mb-1">THUMBNAIL</label>
-                    <input type="file" name="thumbnail" accept="image/*"
+                    <input type="file" name="thumbnail" id="fThumbnail" accept="image/*"
                            class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-300" />
                     <p class="text-xs text-gray-400 mt-1">Format: JPG, JPEG, PNG, atau WebP. Maksimal 2MB.</p>
+                    <p id="editThumbnailNote" class="hidden text-xs text-gray-400 mt-1">Kosongkan jika tidak ingin mengganti thumbnail.</p>
                 </div>
 
                 <div>
@@ -279,6 +293,7 @@ Cara: Kepalan tangan dengan ibu jari ke samping"
                 </button>
 
                 <button type="submit"
+                        id="btnSubmitModul"
                         class="flex-1 py-2.5 rounded-xl text-white text-sm font-bold hover:opacity-90 transition bg-[#4A1A6B]">
                     Simpan
                 </button>
@@ -289,7 +304,11 @@ Cara: Kepalan tangan dengan ibu jari ke samping"
 
 @push('scripts')
 <script>
+    let kartuAktif = null;
+
     function klikKartu(el) {
+        kartuAktif = el;
+
         const huruf = el.dataset.huruf;
         const modul = el.dataset.modul;
         const penjelasan = el.dataset.penjelasan || 'Belum ada penjelasan.';
@@ -326,10 +345,40 @@ Cara: Kepalan tangan dengan ibu jari ke samping"
     });
 
     function openTambahModal(modul) {
+        kartuAktif = null;
+
         document.getElementById('modalFormTitle').textContent = 'Tambah Huruf Baru';
+        document.getElementById('formModul').action = "{{ route('admin.modul.store') }}";
+        document.getElementById('formMethod').value = 'POST';
+        document.getElementById('btnSubmitModul').textContent = 'Simpan';
+
         document.getElementById('fModul').value = modul;
         document.getElementById('fHuruf').value = '';
         document.getElementById('fPenjelasan').value = '';
+        document.getElementById('fThumbnail').value = '';
+
+        document.getElementById('editThumbnailNote').classList.add('hidden');
+
+        showModal('modalForm');
+    }
+
+    function openEditModal() {
+        if (!kartuAktif) return;
+
+        closeModal('modalDetail');
+
+        document.getElementById('modalFormTitle').textContent = 'Edit Huruf ' + kartuAktif.dataset.huruf;
+        document.getElementById('formModul').action = kartuAktif.dataset.updateUrl;
+        document.getElementById('formMethod').value = 'PUT';
+        document.getElementById('btnSubmitModul').textContent = 'Simpan Perubahan';
+
+        document.getElementById('fModul').value = kartuAktif.dataset.modul;
+        document.getElementById('fHuruf').value = kartuAktif.dataset.huruf;
+        document.getElementById('fPenjelasan').value = kartuAktif.dataset.penjelasan || '';
+        document.getElementById('fThumbnail').value = '';
+
+        document.getElementById('editThumbnailNote').classList.remove('hidden');
+
         showModal('modalForm');
     }
 

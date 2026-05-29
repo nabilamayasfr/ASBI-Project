@@ -65,6 +65,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/pengguna', [AdminController::class, 'pengguna'])->name('pengguna');
     Route::get('/modul', [AdminController::class, 'modul'])->name('modul');
     Route::post('/modul', [AdminController::class, 'storeModul'])->name('modul.store');
+    Route::put('/modul/{id}', [AdminController::class, 'updateModul'])->name('modul.update');
     Route::get('/kuis', [AdminController::class, 'kuis'])->name('kuis');
 });
 
