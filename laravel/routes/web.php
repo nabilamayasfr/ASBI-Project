@@ -9,7 +9,7 @@ use App\Http\Controllers\HistoriController;
 use App\Http\Controllers\ProfilController;
 use App\Http\Controllers\AdminAuthController;
 use App\Http\Controllers\LatihanController;
-
+use App\Http\Controllers\Admin\AdminKuisController;
 
 Route::get('/', function () {
     return view('landing');
@@ -50,11 +50,23 @@ Route::get('/faq', function () {
     return view('faq');
 })->name('faq');
 
+
 Route::middleware('auth')->group(function () {
-    Route::get('/profil', [ProfilController::class, 'index'])->name('profile');
-    Route::put('/profil', [ProfilController::class, 'update'])->name('profile.update');
+    Route::get('/profil',  [ProfilController::class, 'index'])->name('profil');
+    Route::put('/profil',  [ProfilController::class, 'update'])->name('profile.update');
 });
 
+Route::prefix('admin')->name('admin.')->group(function () {
+
+    // Halaman
+    Route::get('/kuis', [AdminKuisController::class, 'index'])->name('kuis');
+
+    // API endpoints (dipanggil JavaScript)
+    Route::get('/kuis/data',      [AdminKuisController::class, 'getData']);
+    Route::post('/soal',          [AdminKuisController::class, 'tambahSoal']);
+    Route::put('/soal/{id}',      [AdminKuisController::class, 'editSoal']);
+    Route::delete('/soal/{id}',   [AdminKuisController::class, 'hapusSoal']);
+});
 
 Route::get('/pembelajaran.index', [PembelajaranController::class, 'index'])->name('pembelajaran.index');
 Route::get('/pembelajaran/{modul}/{huruf}', [PembelajaranController::class, 'showHuruf'])->name('pembelajaran.huruf');

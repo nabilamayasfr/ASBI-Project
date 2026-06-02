@@ -203,7 +203,7 @@
   </button>
 
   <div class="profile-menu" id="profileMenu">
-    <a href="{{ route('profile') }}">Profile</a>
+    <a href="{{ route('profil') }}">Profile</a>
 
     <form action="{{ route('logout') }}" method="POST">
       @csrf
@@ -239,7 +239,7 @@
     Histori
   </a>
   <div class="profile-link-mobile">
-    <a href="{{ route('profile') }}" class="btn-profile" style="display:inline-flex;">
+    <a href="{{ route('profil') }}" class="btn-profile" style="display:inline-flex;">
       <div class="avatar">
         {{ strtoupper(substr(auth()->user()->name ?? 'A', 0, 1)) }}
       </div>
