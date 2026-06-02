@@ -66,24 +66,6 @@
 
         </div>
 
-        {{-- Timer --}}
-        <div class="flex flex-col items-center mb-5">
-
-            <div class="w-16 h-16 rounded-full border-4 flex items-center justify-center mb-2"
-                 style="border-color: #C07EB5;">
-
-                <span id="timerText"
-                      class="text-2xl font-extrabold"
-                      style="color: #C07EB5;">
-
-                    5
-                </span>
-            </div>
-
-            <p class="text-gray-500 text-xs font-medium">
-                Detik tersisa
-            </p>
-        </div>
 
         {{-- Kamera --}}
         <div class="w-full bg-white rounded-2xl shadow-md overflow-hidden border border-gray-100">
@@ -93,10 +75,16 @@
 
                 {{-- Camera --}}
                 <video id="cameraFeed"
-                       autoplay
-                       playsinline
-                       class="w-full h-full object-cover transition duration-300">
-                </video>
+       autoplay
+       playsinline
+       class="w-full h-full object-cover transition duration-300">
+</video>
+
+<canvas id="captureCanvas"
+        width="480"
+        height="360"
+        class="hidden">
+</canvas>
 
                 {{-- Corner Detection --}}
                 <div class="absolute top-3 left-3 w-8 h-8 border-t-2 border-l-2 border-green-400 rounded-tl"></div>
@@ -115,29 +103,7 @@
                         Kamera tidak tersedia
                     </p>
                 </div>
-
-                {{-- Timer Overlay --}}
-                <div id="timerOverlay"
-                     class="absolute inset-0 hidden flex-col items-center justify-center bg-black/70 z-20">
-
-                    <div class="text-center">
-
-
-                        <p class="text-pink-200 text-sm mb-5">
-                            Klik tombol ulangi untuk mencoba lagi
-                        </p>
-
-                        <button onclick="resetPractice()"
-                                class="px-5 py-2 rounded-xl bg-pink-500 text-white font-bold hover:bg-pink-600 transition">
-
-                            Ulangi Praktik
-                        </button>
-
-                    </div>
-                </div>
-            </div>
-
-            {{-- Status --}}
+                            {{-- Status --}}
             <div class="px-4 py-3 bg-gray-100 text-center">
 
                 <p id="detectionStatus"
@@ -180,100 +146,224 @@
 
 @push('scripts')
 <script>
-
     let timeLeft = 5;
     let timerInterval = null;
+    let detectionInterval = null;
+    let cameraStream = null;
+    let isProcessing = false;
 
     const timerText = document.getElementById('timerText');
     const detectionStatus = document.getElementById('detectionStatus');
+    const video = document.getElementById('cameraFeed');
+    const canvas = document.getElementById('captureCanvas');
+
+    const TARGET_HURUF = "{{ strtoupper($huruf) }}";
+    const MODULE = "{{ strtoupper($modul) }}";
+
+    const FASTAPI_URL = "http://127.0.0.1:8000/predict";
+
+    let lastPredictions = [];
 
     // TIMER
     function startTimer() {
-
         if (timerInterval) {
             clearInterval(timerInterval);
         }
 
         timeLeft = 5;
-
         timerText.innerText = timeLeft;
         timerText.style.color = '#C07EB5';
 
         timerInterval = setInterval(() => {
-
             timeLeft--;
-
             timerText.innerText = timeLeft >= 0 ? timeLeft : 0;
 
             if (timeLeft <= 0) {
-
                 clearInterval(timerInterval);
+                stopDetection();
 
                 timerText.innerText = '0';
 
-                detectionStatus.innerText = 'Waktu habis!';
+                detectionStatus.innerText = 'Waktu habis! Klik ulangi untuk mencoba lagi.';
                 detectionStatus.style.color = '#EF4444';
 
-                // Blur kamera
-                document.getElementById('cameraFeed').style.filter = 'blur(4px)';
-
-                // Tampilkan overlay
+                video.style.filter = 'blur(4px)';
                 document.getElementById('timerOverlay').classList.remove('hidden');
 
                 return;
             }
-
         }, 1000);
     }
 
     // CAMERA
     async function startCamera() {
-
         try {
-
-            const stream = await navigator.mediaDevices.getUserMedia({
-                video: true
+            cameraStream = await navigator.mediaDevices.getUserMedia({
+                video: true,
+                audio: false
             });
 
-            const video = document.getElementById('cameraFeed');
-
-            video.srcObject = stream;
-
+            video.srcObject = cameraStream;
             video.style.display = 'block';
 
             document.getElementById('cameraPlaceholder').style.display = 'none';
 
-            detectionStatus.innerText = 'Mendeteksi Tangan...';
+            detectionStatus.innerText = 'Kamera aktif. Mendeteksi tangan...';
+            detectionStatus.style.color = '';
+
+            startDetection();
 
         } catch (err) {
-
             console.warn('Kamera tidak bisa diakses:', err);
 
             document.getElementById('cameraPlaceholder').style.display = 'flex';
 
             detectionStatus.innerText = 'Izinkan akses kamera untuk mendeteksi isyarat.';
+            detectionStatus.style.color = '#EF4444';
         }
+    }
+
+    // START REAL-TIME DETECTION
+    function startDetection() {
+        if (detectionInterval) {
+            clearInterval(detectionInterval);
+        }
+
+        detectionInterval = setInterval(() => {
+            captureAndPredict();
+        }, 700);
+    }
+
+    // STOP REAL-TIME DETECTION
+    function stopDetection() {
+        if (detectionInterval) {
+            clearInterval(detectionInterval);
+            detectionInterval = null;
+        }
+    }
+
+    // AMBIL FRAME KAMERA DAN KIRIM KE FASTAPI
+    async function captureAndPredict() {
+        if (isProcessing) return;
+        if (!video.srcObject) return;
+
+        isProcessing = true;
+
+        const context = canvas.getContext('2d');
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        canvas.toBlob(async function(blob) {
+            if (!blob) {
+                isProcessing = false;
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('module', MODULE);
+            formData.append('file', blob, 'frame.jpg');
+
+            try {
+                const response = await fetch(FASTAPI_URL, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                handlePredictionResult(result);
+
+            } catch (error) {
+                console.error('Gagal menghubungi FastAPI:', error);
+
+                detectionStatus.innerText = 'Gagal menghubungi FastAPI. Pastikan server FastAPI menyala.';
+                detectionStatus.style.color = '#EF4444';
+            }
+
+            isProcessing = false;
+        }, 'image/jpeg', 0.8);
+    }
+
+    // PROSES HASIL PREDIKSI
+    function handlePredictionResult(result) {
+        if (!result.success) {
+            detectionStatus.innerText = result.message || 'Tangan tidak terdeteksi.';
+            detectionStatus.style.color = '#6B7280';
+            return;
+        }
+
+        const predicted = result.prediction.toUpperCase();
+        const confidence = result.confidence;
+        const confidencePercent = (confidence * 100).toFixed(2);
+
+        // Simpan beberapa prediksi terakhir supaya hasil real-time lebih stabil
+        lastPredictions.push(predicted);
+
+        if (lastPredictions.length > 5) {
+            lastPredictions.shift();
+        }
+
+        const finalPrediction = getMostFrequentPrediction(lastPredictions);
+
+        if (confidence < 0.70) {
+            detectionStatus.innerText =
+                `Terdeteksi ${predicted} (${confidencePercent}%), tetapi confidence masih rendah. Coba perjelas posisi tangan.`;
+
+            detectionStatus.style.color = '#F59E0B';
+            return;
+        }
+
+        if (finalPrediction === TARGET_HURUF) {
+            detectionStatus.innerText =
+                `Benar! Gesture huruf ${TARGET_HURUF} terdeteksi (${confidencePercent}%).`;
+
+            detectionStatus.style.color = '#22C55E';
+
+            // Kalau sudah benar, deteksi bisa dihentikan agar hasil tidak loncat
+            stopDetection();
+
+            if (timerInterval) {
+                clearInterval(timerInterval);
+            }
+
+        } else {
+            detectionStatus.innerText =
+                `Terdeteksi ${finalPrediction} (${confidencePercent}%). Target huruf: ${TARGET_HURUF}.`;
+
+            detectionStatus.style.color = '#EF4444';
+        }
+    }
+
+    // VOTING 5 FRAME TERAKHIR
+    function getMostFrequentPrediction(predictions) {
+        const counts = {};
+
+        predictions.forEach(item => {
+            counts[item] = (counts[item] || 0) + 1;
+        });
+
+        return Object.keys(counts).reduce((a, b) => {
+            return counts[a] > counts[b] ? a : b;
+        });
     }
 
     // RESET PRACTICE
     function resetPractice() {
+        video.style.filter = 'blur(0px)';
 
-        // Hapus blur kamera
-        document.getElementById('cameraFeed').style.filter = 'blur(0px)';
-
-        // Hilangkan overlay
         document.getElementById('timerOverlay').classList.add('hidden');
 
         detectionStatus.innerText = 'Mendeteksi Tangan...';
         detectionStatus.style.color = '';
 
+        lastPredictions = [];
+
         startTimer();
+        startDetection();
     }
 
     // INIT
     startCamera();
     startTimer();
-
 </script>
 @endpush
 
